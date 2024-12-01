@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin-dashboard.css">
+</head>
+
+<body>
+    <!-- Dashboard Header -->
+    <header class="header">
+        <div class="logo-container">
+            <img src="quiz-master-logo.png" alt="Quiz Master Logo" class="logo">
+            <span class="logo-text">Quiz Master</span>
+        </div>
+        <nav class="nav-links">
+            <a href="login-signup.html">Logout</a>
+        </nav>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Welcome Section -->
+        <div class="welcome-box">
+            <h2>Welcome,</h2>
+            <h1><span id="adminName">Admin Name</span></h1>
+            <p>Manage quizzes, students, and performance analytics effectively.</p>
+        </div>
+
+        <!-- Total Students Section -->
+        <div class="total-students-box">
+            <h3>Total Students</h3>
+            <p id="totalStudentsCount">Loading...</p>
+        </div>
+
+        <!-- Add & View Questions Section -->
+        <div class="add-view-questions-container">
+            <!-- Add Questions Section -->
+            <div class="add-questions-box">
+                <h3>Add Questions</h3>
+                <form id="addQuestionForm" action="add_questions.php" method="POST">
+                    <!-- Select the category -->
+                    <div class="form-group">
+                        <label for="category">Select Category</label>
+                        <select id="category" name="category" required>
+                            <option value="">Choose...</option>
+                            <option value="math">Math</option>
+                            <option value="science">Science</option>
+                            <option value="history">History</option>
+                            <!-- More categories can be added dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Number of Questions -->
+                    <div class="form-group">
+                        <label for="numQuestions">Number of Questions</label>
+                        <input type="number" id="numQuestions" name="numQuestions" min="0" max="20" value="0" required>
+                    </div>
+
+                    <!-- Time Limit Selection -->
+                    <div class="form-group">
+                        <label for="timeLimit">Select Time Limit (Minutes)</label>
+                        <select id="timeLimit" name="time_limit" required>
+                            <option value="">Choose...</option>
+                            <option value="1">1 Minute</option>
+                            <option value="2">2 Minutes</option>
+                            <option value="5">5 Minutes</option>
+                            <option value="10">10 Minutes</option>
+                            <option value="15">15 Minutes</option>
+                            <option value="30">30 Minutes</option>
+                        </select>
+                    </div>
+
+                    <!-- Questions will be dynamically added here -->
+                    <div id="questionsContainer"></div>
+
+                    <button type="submit" class="btn">Add Questions</button>
+                </form>
+            </div>
+
+            <!-- View Questions Section -->
+            <div class="view-questions-box">
+                <h3>View Questions by Category</h3>
+                <form id="viewQuestionsForm">
+                    <div class="form-group">
+                        <label for="viewCategory">Select Category</label>
+                        <select id="viewCategory" name="category" required>
+                            <option value="">Choose...</option>
+                            <option value="math">Math</option>
+                            <option value="science">Science</option>
+                            <option value="history">History</option>
+                            <!-- More categories can be added dynamically -->
+                        </select>
+                    </div>
+                    <button type="button" class="btn" id="loadQuestions">Load Questions</button>
+                </form>
+
+                <div id="questionsListContainer" class="questions-list">
+                    <!-- Questions will be displayed here dynamically -->
+                </div>
+
+                <div id="editQuestionModal" class="modal">
+                    <div class="modal-content">
+                        <h3>Edit Question</h3>
+                        <form id="editQuestionForm">
+                            <div class="form-group">
+                                <label for="editQuestionText">Question Text</label>
+                                <textarea id="editQuestionText" name="text" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editOptions">Options (comma-separated)</label>
+                                <input type="text" id="editOptions" name="options" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="editCorrectOption">Correct Option</label>
+                                <select id="editCorrectOption" name="correct" required>
+                                    <option value="1">Option 1</option>
+                                    <option value="2">Option 2</option>
+                                    <option value="3">Option 3</option>
+                                    <option value="4">Option 4</option>
+                                </select>
+                            </div>
+                            <input type="hidden" id="editQuestionId" name="question_id" />
+                            <button type="button" class="btn" id="submitEdit">Save Changes</button>
+                            <button type="button" class="btn" onclick="$('#editQuestionModal').hide()">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <p>Created with passion by Quiz Master Team.</p>
+    </footer>
+
+    <!-- Include jQuery for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- JS for Dynamic Content -->
+    <script>
+        $(document).ready(function () {
+            // Function to fetch dashboard data from the backend
+            function fetchDashboardData() {
+                $.ajax({
+                    url: 'admin_dashboard.php', // Backend endpoint for real-time data
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        // Handle unauthorized access
+                        if (data.error) {
+                            alert(data.error);
+                            window.location.href = "login-signup.html";
+                            return;
+                        }
+
+                        // Update admin's name dynamically
+                        $('#adminName').text(data.admin_name);
+                        $('#totalStudentsCount').text(data.total_students || 0);
+                    },
+                    error: function () {
+                        alert("Error loading dashboard data.");
+                    }
+                });
+            }
+
+            // Fetch dashboard data on page load
+            fetchDashboardData();
+
+            // Dynamically add question fields based on the number input
+            $('#numQuestions').on('change', function () {
+                const numQuestions = $(this).val();
+                const questionsContainer = $('#questionsContainer');
+                questionsContainer.empty(); // Clear previous questions
+
+                for (let i = 1; i <= numQuestions; i++) {
+                    questionsContainer.append(`
+                <div class="question-box">
+                    <h4>Question ${i}</h4>
+                    <div class="form-group">
+                        <label for="question${i}">Question Text</label>
+                        <textarea id="question${i}" name="questions[${i}][text]" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="options${i}">Options</label>
+                        <input type="text" name="questions[${i}][options][]" placeholder="Option 1" required>
+                        <input type="text" name="questions[${i}][options][]" placeholder="Option 2" required>
+                        <input type="text" name="questions[${i}][options][]" placeholder="Option 3" required>
+                        <input type="text" name="questions[${i}][options][]" placeholder="Option 4" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="correctOption${i}">Correct Option</label>
+                        <select id="correctOption${i}" name="questions[${i}][correct]" required>
+                            <option value="">Select Correct Option</option>
+                            <option value="1">Option 1</option>
+                            <option value="2">Option 2</option>
+                            <option value="3">Option 3</option>
+                            <option value="4">Option 4</option>
+                        </select>
+                    </div>
+                </div>
+            `);
+                }
+            });
+        });
+
+        $('#loadQuestions').on('click', function () {
+            const category = $('#viewCategory').val();
+
+            if (!category) {
+                alert("Please select a category.");
+                return;
+            }
+
+            // AJAX call to fetch questions
+            $.ajax({
+                url: 'fetch_questions.php',
+                type: 'POST',
+                data: { category: category },
+                dataType: 'json',
+                success: function (data) {
+                    const questionsList = $('#questionsListContainer');
+                    questionsList.empty();
+
+                    if (data.error) {
+                        questionsList.append(`<p>${data.error}</p>`);
+                        return;
+                    }
+
+                    if (data.length === 0) {
+                        questionsList.append('<p>No questions found for this category.</p>');
+                        return;
+                    }
+
+                    data.forEach((question, index) => {
+                        const optionsList = question.options
+                            .map((option, idx) =>
+                                `<li ${option === question.correct_option ? 'style="font-weight:bold;color:green;"' : ''}>
+                                    ${option}
+                                </li>`)
+                            .join('');
+
+                        questionsList.append(`
+                            <div class="question-item">
+                                <h4>Q${index + 1}: ${question.text}</h4>
+                                <ul>${optionsList}</ul>
+                                <button class="btn edit-btn" data-id="${question.id}" data-text="${question.text}" data-options='${JSON.stringify(question.options)}' data-correct="${question.correct_option}">Edit</button>
+                                <button class="btn delete-btn" data-id="${question.id}">Delete</button>
+                            </div>
+                        `);
+                    });
+                },
+                error: function () {
+                    alert("Error loading questions.");
+                },
+            });
+        });
+
+
+        // Delete a question
+        $(document).on('click', '.delete-btn', function () {
+            const questionId = $(this).data('id');
+
+            if (!confirm("Are you sure you want to delete this question?")) {
+                return;
+            }
+
+            // AJAX call to delete the question
+            $.ajax({
+                url: 'delete_question.php',
+                type: 'POST',
+                data: { question_id: questionId },
+                success: function (response) {
+                    alert(response);
+                    $('#loadQuestions').trigger('click'); // Reload questions after deletion
+                },
+                error: function () {
+                    alert("Error deleting the question.");
+                },
+            });
+        });
+
+        // Edit a question
+        $(document).on('click', '.edit-btn', function () {
+            const questionId = $(this).data('id');
+            const questionText = $(this).data('text');
+            const options = $(this).data('options'); // This should already be an array
+            const correctOption = $(this).data('correct');
+
+            // Pre-populate the Edit Form with the current question data
+            $('#editQuestionModal').show();
+            $('#editQuestionText').val(questionText);
+            $('#editOptions').val(options.join(', ')); // Join options with comma for display in the input field
+            $('#editCorrectOption').val(correctOption);
+            $('#editQuestionId').val(questionId);
+        });
+
+
+        // Submit the edited question
+        $('#submitEdit').on('click', function () {
+            const questionId = $('#editQuestionId').val();
+            const questionText = $('#editQuestionText').val();
+            const options = $('#editOptions').val().split(',').map(option => option.trim()); // Convert to array of options
+            const correctOption = $('#editCorrectOption').val();
+
+            // AJAX call to update the question
+            $.ajax({
+                url: 'update_question.php',
+                type: 'POST',
+                data: {
+                    question_id: questionId,
+                    text: questionText,
+                    options: options,  // Send options as an array
+                    correct: correctOption,
+                },
+                success: function (response) {
+                    alert(response);
+                    $('#editQuestionModal').hide();
+                    $('#loadQuestions').trigger('click'); // Reload questions after update
+                },
+                error: function () {
+                    alert("Error updating the question.");
+                },
+            });
+        });
+
+    </script>
+</body>
+
+</html>

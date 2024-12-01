@@ -1,0 +1,131 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #6e7fdb, #3f4cbb);
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.quiz-start-container {
+    width: 80%;
+    max-width: 600px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 50px;
+    margin-right: 10px;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Exam Rules */
+.exam-rules {
+    margin-bottom: 30px;
+}
+
+.rules-container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.rules-list {
+    list-style-type: none;
+    font-size: 16px;
+}
+
+.rules-list li {
+    margin: 10px 0;
+}
+
+/* Category Selection */
+.category-selection {
+    margin-bottom: 30px;
+}
+
+.category-dropdown {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3f4cbb;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.category-dropdown:hover {
+    background-color: #2e3b8e;
+}
+
+/* Start Quiz Button */
+.start-quiz {
+    margin-top: 20px;
+}
+
+.btn-start {
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #6e7fdb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s, background-color 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-start:hover {
+    background-color: #3f4cbb;
+    transform: scale(1.1);
+}
+
+/* Hover Effect */
+.hover-effect {
+    transform: scale(1.1);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer */
+.footer {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.footer p {
+    margin: 0;
+}

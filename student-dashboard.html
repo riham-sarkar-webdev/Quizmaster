@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="student-dashboard.css">
+</head>
+
+<body>
+    <!-- Dashboard Header -->
+    <header class="header">
+        <div class="logo-container">
+            <img src="quiz-master-logo.png" alt="Quiz Master Logo" class="logo">
+            <span class="logo-text">Quiz Master</span>
+        </div>
+        <nav class="nav-links">
+            <a href="login-signup.html">Logout</a>
+        </nav>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Welcome Section -->
+        <div class="welcome-box">
+            <h1>Welcome, <span id="name">Loading...</span></h1>
+            <p>Your learning journey continues...</p>
+        </div>
+
+        <!-- Real-Time Date and Time Box -->
+        <div class="datetime-box">
+            <h2 id="currentDateTime">Loading...</h2>
+        </div>
+
+        <!-- Start Quiz Button -->
+        <div class="start-quiz-container">
+            <button id="startQuizBtn" onclick="startQuiz()">Start New Quiz</button>
+        </div>
+
+        <!-- Quiz History Table -->
+        <div class="quiz-history-container">
+            <h2>Quiz History</h2>
+            <table id="quizHistoryTable" class="quiz-history-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Score</th>
+                        <th>Attempted At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Quiz history will be populated here dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <p>Created with passion by Quiz Master Team.</p>
+    </footer>
+
+    <!-- Include jQuery for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- JS for Dynamic Content -->
+    <script>
+        $(document).ready(function () {
+            // Fetch the data from the server
+            $.ajax({
+                url: 'student_dashboard.php', // The PHP script to fetch data
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    // Check for error in the response
+                    if (data.error) {
+                        alert(data.error);
+                        window.location.href = 'login-signup.html'; // Redirect to login
+                        return;
+                    }
+
+                    // Store the student's name in localStorage
+                    if (data.name) {
+                        localStorage.setItem('studentName', data.name); // Store name in localStorage
+                        console.log("Name stored in localStorage: " + data.name); // Debugging line
+                        // Display the student's name on the page
+                        $('#name').text(data.name);
+                    }
+
+                    // Load quiz history from quiz_results table
+                    if (data.quizHistory && data.quizHistory.length > 0) {
+                        let historyHtml = '';
+                        data.quizHistory.forEach(function (quiz) {
+                            historyHtml += `
+                                <tr>
+                                    <td>${quiz.category}</td>
+                                    <td>${quiz.score}</td>
+                                    <td>${quiz.attempted_at}</td>
+                                </tr>
+                            `;
+                        });
+                        $('#quizHistoryTable tbody').html(historyHtml);
+                    } else {
+                        $('#quizHistoryTable tbody').html('<tr><td colspan="3">No quiz history found.</td></tr>');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR.responseText);  // Inspect the error response
+                    alert("Error loading data: " + textStatus + " - " + errorThrown);
+                }
+            });
+
+            // Function to update date and time every second
+            function updateDateTime() {
+                const currentDateTimeElement = document.getElementById('currentDateTime');
+                const now = new Date();
+
+                // Format the date and time (example: "Friday, Nov 23, 2024 10:30 AM")
+                const formattedDateTime = now.toLocaleString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+
+                currentDateTimeElement.textContent = formattedDateTime;
+            }
+
+            // Update the date and time every second
+            setInterval(updateDateTime, 1000);
+        });
+
+        // Redirect to quiz page
+        function startQuiz() {
+            window.location.href = 'quiz_start.html';
+        }
+    </script>
+</body>
+
+</html>

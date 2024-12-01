@@ -1,0 +1,188 @@
+ /* Global Styles */
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: #f4f7fa;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+}
+
+/* Quiz Container */
+.quiz-container {
+    background: linear-gradient(to top, #007bff, #202c36);
+    border-radius: 12px;
+    width: 80%;
+    max-width: 900px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    color: rgb(0, 0, 0);
+    animation: fadeIn 1s ease-out;
+    max-height: 90vh; /* Adjust this value based on your design */
+    overflow-y: auto; /* Allows scrolling when content exceeds the container's height */
+    padding: 20px;
+}
+
+/* Header Section */
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #ffffff;/* Adds a border below the header */
+}
+
+
+.quiz-header .student-name h3 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #ecff42;
+    margin-left: 10px;
+}
+
+.quiz-header .dashboard-btn-container {
+    margin-left: auto;
+}
+
+.quiz-header .dashboard-btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.quiz-header .dashboard-btn:hover {
+    background-color: #218838;
+}
+
+/* Quiz Form Section */
+.quiz-content {
+    text-align: center;
+}
+
+.quiz-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.question-box {
+    background: #fff;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.question-box h3 {
+    margin-bottom: 15px;
+}
+
+.question-box .options div {
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+}
+
+.question-box .options input {
+    margin-right: 10px;
+}
+
+/* Timer Section */
+.timer-section {
+    position: relative;
+    background-color: #007bff;
+    color: white;
+    padding: 15px;
+
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Adds a shadow for the popup look */
+}
+
+.timer-popup {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.blinking-red {
+    color: red;
+    animation: blink 1s step-end infinite; /* Adds blinking effect */
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+
+/* Submit & Result Section */
+.submit-btn,
+.retry-btn {
+    padding: 12px 30px;
+    font-size: 18px;
+    border-radius: 5px;
+    background-color: #9578e6;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover,
+.retry-btn:hover {
+    background-color: #0056b3;
+}
+
+.result-container {
+    display: none;
+    text-align: center;
+    margin-top: 30px;
+    background: #28a745;
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+}
+
+.result-container h2 {
+    margin-bottom: 15px;
+}
+
+.result-container p {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}

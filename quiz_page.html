@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Page</title>
+    <link rel="stylesheet" href="quiz-page.css">
+    <style>
+        /* Add your styles here */
+        .result-container {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .result-container h2 {
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="quiz-container">
+        <!-- Header Section -->
+        <header class="quiz-header">
+
+            <!-- Timer Section -->
+            <div class="timer-section">
+                <div id="timerPopup" class="timer-popup">
+                    <span id="timer">01:00</span> <!-- Timer will be dynamically updated here -->
+                </div>
+            </div>
+
+            <div class="student-name">
+                <h3>Welcome, <span id="studentName">Loading...</span></h3>
+            </div>
+            <div class="dashboard-btn-container">
+                <a href="student-dashboard.html" class="dashboard-btn">Student Dashboard</a>
+            </div>
+        </header>
+
+        <!-- Quiz Form Section -->
+        <main class="quiz-content">
+            <h1 class="quiz-title">Quiz Time!</h1>
+            <form id="quizForm">
+                <div id="questionsContainer" class="questions-container"></div>
+                <button type="button" id="submitQuiz" class="submit-btn">Submit Quiz</button>
+            </form>
+
+            <!-- Result Section -->
+            <div class="result-container" id="resultContainer">
+                <h2>Quiz Completed!</h2>
+                <p>Your Score: <span id="score"></span></p>
+                <button id="retryQuiz" class="retry-btn">Retry Quiz</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Get the student's name from localStorage
+            const studentName = localStorage.getItem('studentName');
+
+            if (studentName) {
+                // Display the student's name
+                $('#studentName').text(studentName);
+            } else {
+                // Handle the case where the name is not found in localStorage
+                console.error('Error: Student name not found in localStorage.');
+                alert('Error: Student name not found.');
+            }
+
+            let timer = 60; // Set your timer (60 seconds)
+            const timerInterval = setInterval(() => {
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Submitting the quiz automatically.');
+                    $('#quizForm').submit();
+                }
+
+                let minutes = Math.floor(timer / 60).toString().padStart(2, '0');
+                let seconds = (timer % 60).toString().padStart(2, '0');
+                const timeText = `${minutes}:${seconds}`;
+                $('#timer').text(timeText);
+
+                if (timer <= 10) {
+                    $('#timer').addClass('blinking-red');  // Adds blinking effect when time is low
+                } else {
+                    $('#timer').removeClass('blinking-red');
+                }
+
+                timer--;
+            }, 1000);
+
+            // Get category from the URL
+            const category = new URLSearchParams(window.location.search).get('category');
+            if (!category) {
+                alert('Category not specified!');
+                window.location.href = 'quiz_start.html'; // Redirect to start page
+                return;
+            }
+
+            // Fetch questions based on the category
+            $.ajax({
+                url: 'fetch_questions_with_options.php',
+                type: 'GET',
+                data: { category: category },
+                dataType: 'json',
+                success: function (data) {
+                    if (!data.questions || data.questions.length === 0) {
+                        alert('No questions found for this category!');
+                        window.location.href = 'quiz_start.html'; // Redirect to start page
+                        return;
+                    }
+
+                    const questionsContainer = $('#questionsContainer');
+                    data.questions.forEach((question, index) => {
+                        let optionsHtml = '';
+                        question.options.forEach((option) => {
+                            optionsHtml += `
+                        <div>
+                            <input type="radio" id="q${question.id}_o${option.id}" 
+                                name="answers[${question.id}]" value="${option.id}" required>
+                            <label for="q${question.id}_o${option.id}">${option.text}</label>
+                        </div>
+                    `;
+                        });
+
+                        questionsContainer.append(`
+                    <div class="question-box" data-question-id="${question.id}" data-correct-answer-id="${question.correct_answer_id}">
+                        <h3>Q${index + 1}: ${question.text}</h3>
+                        <div class="options">${optionsHtml}</div>
+                    </div>
+                `);
+                    });
+                },
+                error: function (xhr) {
+                    console.error('Error:', xhr.responseText);
+                    alert('Error loading questions.');
+                    window.location.href = 'quiz_start.html'; // Redirect to start page
+                }
+            });
+
+            // Submit quiz button
+            $('#submitQuiz').on('click', function () {
+                const answers = {};
+                let totalQuestions = 0;
+                let correctAnswers = 0;
+
+                $('.question-box').each(function () {
+                    const questionId = $(this).data('question-id');
+                    const selectedOption = $(`input[name="answers[${questionId}]"]:checked`).val();
+
+                    if (selectedOption) {
+                        totalQuestions++;
+                        answers[questionId] = selectedOption;
+
+                        const correctAnswerId = $(this).data('correct-answer-id');
+                        if (selectedOption == correctAnswerId) {
+                            correctAnswers++;
+                        }
+                    }
+                });
+
+                if (totalQuestions === 0) {
+                    alert('Please answer at least one question.');
+                    return;
+                }
+
+                // Calculate score
+                const score = correctAnswers;
+
+                // Show result
+                $('#score').text(score.toFixed(2));
+                $('#resultContainer').show();
+
+                // Scroll to result container
+                $('#resultContainer')[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                // Send score to the backend to save in the database
+                $.ajax({
+                    url: 'submit_score.php',
+                    type: 'POST',
+                    data: { student_name: studentName, score: score, category: category },
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.success) {
+                            console.log('Score submitted successfully');
+                        } else {
+                            alert('Error submitting score');
+                        }
+                    },
+                    error: function (xhr) {
+                        alert('Error submitting score');
+                    }
+                });
+            });
+
+            // Retry quiz button
+            $('#retryQuiz').on('click', function () {
+                location.reload(); // Reload the page to retry the quiz
+            });
+        });
+    </script>
+
+</body>
+
+</html>

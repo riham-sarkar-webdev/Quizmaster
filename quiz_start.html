@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Quiz</title>
+    <link rel="stylesheet" href="quiz-start.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <!-- Quiz Start Container -->
+    <div class="quiz-start-container">
+        <!-- Header with Logo -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="quiz-master-logo.png" alt="Quiz Master Logo" class="logo">
+                <span class="logo-text">Quiz Master</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Exam Rules Section -->
+            <section class="exam-rules">
+                <h2>Exam Rules</h2>
+                <div class="rules-container">
+                    <ul class="rules-list">
+                        <li>Choose your category carefully.</li>
+                        <li>You will have a limited time for each quiz.</li>
+                        <li>No cheating or using external help.</li>
+                        <li>Once you start, you cannot change your category.</li>
+                        <li>Attempt all questions to maximize your score!</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Category Selection Section -->
+            <section class="category-selection">
+                <h2>Select Your Category</h2>
+                <select id="category" name="category" class="category-dropdown">
+                    <option value="" disabled selected>Select a Category</option>
+                    <option value="math">Math</option>
+                    <option value="science">Science</option>
+                    <option value="history">History</option>
+                    <!-- Add more categories dynamically if needed -->
+                </select>
+            </section>
+
+            <!-- Start Quiz Button -->
+            <section class="start-quiz">
+                <button id="startQuizButton" class="btn-start">Start Quiz</button>
+            </section>
+        </div>
+
+        <!-- Footer Section -->
+        <footer class="footer">
+            <p>Created with passion by Quiz Master Team.</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript for Category Validation and Animation -->
+    <script>
+        $(document).ready(function() {
+            // Start Quiz Button click event
+            $('#startQuizButton').on('click', function() {
+                const category = $('#category').val();
+                if (!category) {
+                    alert('Please select a category before starting the quiz!');
+                    return;
+                }
+
+                // Redirect to the quiz page with the selected category
+                window.location.href = 'quiz_page.html?category=' + category;
+            });
+
+            // Animation for Start Quiz Button
+            $('#startQuizButton').hover(function() {
+                $(this).addClass('hover-effect');
+            }, function() {
+                $(this).removeClass('hover-effect');
+            });
+        });
+    </script>
+</body>
+</html>
